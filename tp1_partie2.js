@@ -21,3 +21,16 @@ db.transactions.aggregate([
         }
     }
 ])
+
+//  2.1.2 Identifiez la transaction avec le montant le plus élevé. Est-elle frauduleuse ? Affichez tous ses détails
+
+    db.transactions.aggregate([
+        {
+            $setWindowFields: {
+                output: { maxAmount: { $max: "$Transaction_Amount (in Million)" } }
+                }
+            },
+        { $match: { $expr: { $eq: ["$Transaction_Amount (in Million)", "$maxAmount"] } } },
+        { $unset: "maxAmount" },
+        { $addFields: { isFraud: { $eq: ["$Fraud_Label", "Fraud"] } } }
+        ])
