@@ -131,3 +131,19 @@ db.transactions.aggregate([
             }
         }
         ])
+
+    // 2.3.1 Le système a détecté une erreur : toutes les transactions du client "24239" datant
+    //du 15/01/2025 ont été incorrectement marquées comme frauduleuses. Corrigez cette erreur en les
+    //marquant comme légitimes.
+
+    db.transactions.find({Customer_ID: 24239,
+        Transaction_Date: { $gte: new Date("2025-01-15") }})
+
+    db.transactions.updateMany({
+        Customer_ID: 24239,
+        Transaction_Date: { $gte: new Date("2025-01-15") },
+        Fraud_Label: "Fraud"
+        },
+        {
+            $set: { "Fraud_Label": "Normal" }
+            })
