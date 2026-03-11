@@ -58,40 +58,19 @@ db.transactions.find()
 
     db.transactions.aggregate([
         {
+            $match: {
+                "Transaction_Amount (in Million)": { $gt: 5 },
+                "Is_International_Transaction": true,
+                "Card_Type": "Credit",
+                "Previous_Fraud_Count": { $gt: 0 }
+                }
+            },
+        {
             $group: {
                 _id: null,
-                TotalMatchingTransactions: {
-                    $sum: {
-                        $cond: [
-                            {
-                                $and: [
-                                    {$gt: ["$Transaction_Amount (in Million)", 5]},
-                                    {$eq: ["$Is_International_Transaction", true]},
-                                    {$eq: ["$Card_Type", "Credit"]},
-                                    {$gt: ["$Previous_Fraud_Count", 0]}
-                                    ]
-                                },
-                            1,
-                            0
-                            ]
-                        }
-                    },
+                TotalMatchingTransactions: { $sum: 1 },
                 TotalFraudTransactions: {
-                    $sum: {
-                        $cond: [
-                            {
-                                $and: [
-                                    {$gt: ["$Transaction_Amount (in Million)", 5]},
-                                    {$eq: ["$Is_International_Transaction", true]},
-                                    {$eq: ["$Card_Type", "Credit"]},
-                                    {$gt: ["$Previous_Fraud_Count", 0]},
-                                    {$eq: ["$Fraud_Label", "Fraud"]}
-                                    ]
-                                },
-                            1,
-                            0
-                            ]
-                        }
+                    $sum: { $cond: [{ $eq: ["$Fraud_Label", "Fraud"] }, 1, 0] }
                     }
                 }
             },
@@ -99,7 +78,20 @@ db.transactions.find()
             $project: {
                 _id: 0,
                 TotalMatchingTransactions: 1,
-                FraudRate: {$multiply: [{$divide: ["$TotalFraudTransactions", "$TotalMatchingTransactions"]}, 100]}
+                FraudRate: {
+                    $multiply: [{ $divide: ["$TotalFraudTransactions", "$TotalMatchingTransactions"] }, 100]
+                    }
                 }
             }
         ])
+
+
+    //  2.2.2 Identifiez les transactions effectuées à une heure inhabituelle (Unusual_Time_Transaction)
+    //ET à plus de 100 km du domicile du client (Distance_From_Home). Parmi ces transactions, combien sont
+    //frauduleuses ?
+
+db.transactions.aggregate([
+    {
+        $match: {}
+    }
+])
