@@ -92,6 +92,21 @@ db.transactions.find()
 
 db.transactions.aggregate([
     {
-        $match: {}
+        $match: {
+            "Distance_From_Home": { $gt: 100},
+            "Unusual_Time_Transaction": true
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            TotalTransactions: {$sum: 1},
+            TotalFraud: {$sum: {$cond: [{$eq: ["$Fraud_Label", "Fraud"]}, 1, 0]}}
+        }
+    },
+    {
+        $project: {
+            _id: 0
+        }
     }
 ])
