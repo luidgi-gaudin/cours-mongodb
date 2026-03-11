@@ -110,3 +110,24 @@ db.transactions.aggregate([
         }
     }
 ])
+
+    // 2.2.3 Recherchez les transactions effectuées dans les catégories de marchands suivantes :
+    //"Electronics", "Jewelry", "Luxury Goods". Affichez uniquement le Transaction_ID, le montant, la catégorie et
+    //le statut de fraude.
+
+    db.transactions.aggregate([
+        {
+            $match: {
+                "Merchant_Category": { $in: ["Electronics", "Jewelry", "Luxury Goods"] }
+            }
+        },
+        {
+            $project:{
+                _id: 0,
+                "Transaction_ID": 1,
+                "Transaction_Amount (in Million)": 1,
+                "Merchant_Category": 1,
+                "Fraud_Label": 1
+            }
+        }
+        ])
