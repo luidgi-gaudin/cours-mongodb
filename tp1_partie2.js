@@ -112,13 +112,13 @@ db.transactions.aggregate([
 ])
 
     // 2.2.3 Recherchez les transactions effectuées dans les catégories de marchands suivantes :
-    //"Electronics", "Jewelry", "Luxury Goods". Affichez uniquement le Transaction_ID, le montant, la catégorie et
+    //"Electronics", "Clothing", "Restaurant". Affichez uniquement le Transaction_ID, le montant, la catégorie et
     //le statut de fraude.
 
     db.transactions.aggregate([
         {
             $match: {
-                "Merchant_Category": { $in: ["Electronics", "Jewelry", "Luxury Goods"] }
+                "Merchant_Category": { $in: ["Electronics", "Clothing", "Restaurant"] }
             }
         },
         {
@@ -147,3 +147,42 @@ db.transactions.aggregate([
         {
             $set: { "Fraud_Label": "Normal" }
             })
+
+    //  2.3.2 Ajoutez un nouveau champ risk_level à toutes les transactions. Ce champ doit être
+    //calculé selon ces règles :
+    //"HIGH" si : (montant > 10 millions) OU (Previous_Fraud_Count > 2) OU (Distance_From_Home >
+    //500)
+    //"MEDIUM" si : (montant > 5 millions) OU (Transaction internationale) OU (Failed_Transaction_Count
+    //> 3)
+    //"LOW" pour tous les autres cas
+    //Implémentez cette logique en plusieurs étapes de mise à jour.
+
+    db.transactions.updateMany(
+        {},
+        { $set: { risk_level: "LOW" } }
+        )
+
+    db.transactions.updateMany(
+        {
+            $or: [
+                { "Transaction_Amount (in Million)": { $gt: 5 } },
+                { "Is_International_Transaction": true },
+                { "Failed_Transaction_Count": { $gt: 3 } }
+                ]
+            },
+        { $set: { risk_level: "MEDIUM" } }
+        )
+
+    db.transactions.updateMany(
+        {
+            $or: [
+                { "Transaction_Amount (in Million)": { $gt: 10 } },
+                { "Previous_Fraud_Count": { $gt: 2 } },
+                { "Distance_From_Home": { $gt: 500 } }
+                ]
+            },
+        { $set: { risk_level: "HIGH" } }
+        )
+
+//  2.3.3 Pour des raisons de conformité RGPD, vous devez anonymiser les IP_Address de toutes les
+    //transactions de plus de 2 ans. Remplacez-les par "ANONYMIZED".
