@@ -48,3 +48,58 @@ db.transactions.find()
         { $project: { _id: 1, total: 1 } },
         { $limit: 10 },
         ])
+
+    //  2.2.1 Trouvez toutes les transactions qui remplissent SIMULTANÉMENT ces critères :
+    //Montant supérieur à 5 millions
+    //Transaction internationale
+    //Effectuée avec une carte de crédit
+    //Compte ayant un historique de fraude (Previous_Fraud_Count > 0)
+    //Combien de transactions correspondent ? Quel est le taux de fraude parmi celles-ci ?
+
+    db.transactions.aggregate([
+        {
+            $group: {
+                _id: null,
+                TotalMatchingTransactions: {
+                    $sum: {
+                        $cond: [
+                            {
+                                $and: [
+                                    {$gt: ["$Transaction_Amount (in Million)", 5]},
+                                    {$eq: ["$Is_International_Transaction", true]},
+                                    {$eq: ["$Card_Type", "Credit"]},
+                                    {$gt: ["$Previous_Fraud_Count", 0]}
+                                    ]
+                                },
+                            1,
+                            0
+                            ]
+                        }
+                    },
+                TotalFraudTransactions: {
+                    $sum: {
+                        $cond: [
+                            {
+                                $and: [
+                                    {$gt: ["$Transaction_Amount (in Million)", 5]},
+                                    {$eq: ["$Is_International_Transaction", true]},
+                                    {$eq: ["$Card_Type", "Credit"]},
+                                    {$gt: ["$Previous_Fraud_Count", 0]},
+                                    {$eq: ["$Fraud_Label", "Fraud"]}
+                                    ]
+                                },
+                            1,
+                            0
+                            ]
+                        }
+                    }
+                }
+            },
+        {
+            $project: {
+                _id: 0,
+                TotalMatchingTransactions: 1,
+                FraudRate: {$multiply: [{$divide: ["$TotalFraudTransactions", "$TotalMatchingTransactions"]}, 100]}
+                }
+            }
+        ])
