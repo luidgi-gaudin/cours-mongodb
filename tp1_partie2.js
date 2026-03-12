@@ -186,3 +186,40 @@ db.transactions.aggregate([
 
 //  2.3.3 Pour des raisons de conformité RGPD, vous devez anonymiser les IP_Address de toutes les
     //transactions de plus de 2 ans. Remplacez-les par "ANONYMIZED".
+    db.transactions.updateMany(
+        {
+            Transaction_Date: {
+                $lt: new Date("2025-02-01")
+                }
+            },
+        {
+            $set: { IP_Address: "ANONYMIZED" }
+            }
+        )
+
+    //2.4.1 Créez une collection archive_transactions et déplacez-y toutes les transactions
+    //frauduleuses ayant plus de 3 tentatives échouées (Failed_Transaction_Count >= 3). Après vérification,
+    //supprimez-les de la collection principale
+    db.transactions.aggregate([
+        {
+            $match: {
+                Fraud_Label: "Fraud",
+                Failed_Transaction_Count: { $gte: 2 }
+                }
+            },
+        {
+            $out: "archive_transactions"
+            }
+        ])
+
+    db.archive_transactions.countDocuments()
+
+    db.transactions.deleteMany({
+        Fraud_Label: "Fraud",
+        Failed_Transaction_Count: { $gte: 2 }
+        })
+
+    db.transactions.countDocuments({
+        Fraud_Label: "Fraud",
+        Failed_Transaction_Count: { $gte: 2 }
+        })
