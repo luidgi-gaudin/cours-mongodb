@@ -241,4 +241,4 @@ db.transactions.aggregate([
         Failed_Transaction_Count: { $gte: 2 }
         })
 
-    // Résultat : Les transactions frauduleuses avec >= 2 tentatives échouées sont copiées dans archive_transactions via $out, puis supprimées de la collection principale. Le countDocuments final doit retourner 0.
+    // Résultat : Les transactions frauduleuses avec >= 2 tentatives échouées sont copiées dans archive_transactions via $out, puis supprimées de la collection principale. Le countDocuments final retourne 0.
