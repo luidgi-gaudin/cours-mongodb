@@ -18,6 +18,8 @@
             }
         ])
 
+    // Résultat : Les 24 heures triées par nombre de fraudes décroissant. On identifie les heures les plus risquées.
+
     // 3.1.2 Trouvez les clients qui ont effectué plus de 10 transactions en une seule journée ET dont au moins une transaction a été frauduleuse. Affichez leur Customer_ID et le nombre total de transactions.
 
     db.transactions.aggregate([
@@ -48,6 +50,8 @@
             }
         ])
 
+    // Résultat : Liste des clients avec plus de 10 transactions en un jour et au moins 1 fraude.
+
     // 3.2.1 Identifiez les 5 localisations de transactions (Transaction_Location) avec le taux de fraude le plus élevé. Pour chaque localisation, affichez le nom, le nombre total de transactions, le nombre de fraudes et le taux de fraude en pourcentage.
 
     db.transactions.aggregate([
@@ -72,6 +76,8 @@
         { $sort: { fraudRate: -1 } },
         { $limit: 5 }
         ])
+
+    // Résultat : Les 5 localisations avec le taux de fraude le plus élevé, avec nombre de transactions et taux en %.
 
     // 3.2.2 Trouvez toutes les transactions où la localisation de transaction est différente de la localisation du domicile du client (Customer_Home_Location), avec une distance supérieure à 200 km. Calculez le taux de fraude pour ces transactions "à distance".
 
@@ -101,6 +107,8 @@
             }
         ])
 
+    // Résultat : On obtient le nombre de transactions "à distance" (localisation ≠ domicile et > 200km) et le taux de fraude parmi celles-ci.
+
     // 3.3.1 Identifiez les 10 marchands (Merchant_ID) avec le montant total de transactions frauduleuses le plus élevé. Pour chaque marchand, calculez le montant total des fraudes, le nombre de fraudes et le montant moyen par fraude.
 
     db.transactions.aggregate([
@@ -125,6 +133,8 @@
             },
         { $limit: 10 }
         ])
+
+    // Résultat : Les 10 marchands avec le plus gros montant total de fraudes, avec nombre de fraudes et montant moyen par fraude.
 
     // 3.3.2 Trouvez les catégories de marchands (Merchant_Category) où les clients utilisent préférentiellement des cartes de crédit vs des cartes de débit. Présentez les résultats avec le ratio crédit/débit pour chaque catégorie.
 
@@ -153,6 +163,8 @@
                 }
             }
         ])
+
+    // Résultat : Le ratio crédit/débit pour chaque catégorie de marchand, trié par ratio décroissant. Un ratio > 1 signifie que le crédit est préféré.
 
     // 3.4.1 Identifiez les clients dont le montant de transaction actuel dépasse de plus de 300% leur montant moyen de transaction (Avg_Transaction_Amount). Quel est le taux de fraude pour ces "transactions exceptionnelles" ?
 
@@ -186,6 +198,8 @@
             }
         ])
 
+    // Résultat : Nombre de transactions dépassant 300% de la moyenne du client et taux de fraude parmi celles-ci.
+
     // 3.4.2 Trouvez les transactions où le client a utilisé un nouveau marchand (Is_New_Merchant) ET où c'est une transaction internationale. Analysez si ces facteurs combinés sont des indicateurs forts de fraude.
 
     db.transactions.aggregate([
@@ -213,6 +227,8 @@
                 }
             }
         ])
+
+    // Résultat : Nombre de transactions avec nouveau marchand + international, et taux de fraude. Permet d'évaluer si ces deux facteurs combinés sont un bon indicateur de fraude.
 
     // 3.4.3 Créez une requête qui identifie les "transactions suspectes" selon les critères suivants (au moins 3 doivent être vrais) : Montant > 2x la moyenne du client, Transaction à heure inhabituelle, Nouveau marchand, Transaction internationale, Distance du domicile > 100 km, Plus de 5 transactions dans la journée. Combien de transactions correspondent ? Quel est leur taux de fraude ?
 
@@ -250,3 +266,5 @@
                 }
             }
         ])
+
+    // Résultat : Nombre de transactions suspectes (au moins 3 critères vrais sur 6) et leur taux de fraude. Plus le score est élevé, plus la transaction est suspecte.

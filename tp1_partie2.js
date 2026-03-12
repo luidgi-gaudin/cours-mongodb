@@ -22,6 +22,8 @@ db.transactions.find()
             }
         ])
 
+    // Résultat : On obtient le total de transactions, le nombre de fraudes et le taux de fraude en pourcentage.
+
     //  2.1.2 Identifiez la transaction avec le montant le plus élevé. Est-elle frauduleuse ? Affichez tous ses détails
 
     db.transactions.aggregate([
@@ -34,6 +36,8 @@ db.transactions.find()
         { $unset: "maxAmount" },
         { $addFields: { isFraud: { $eq: ["$Fraud_Label", "Fraud"] } } }
         ])
+
+    // Résultat : La transaction avec le montant le plus élevé est affichée avec tous ses détails. Le champ isFraud indique si elle est frauduleuse.
 
     //  2.1.3 Listez les 10 clients (Customer_ID) ayant effectué le plus grand nombre de transactions. Affichez uniquement leur ID et le nombre de leurs transactions.
 
@@ -48,6 +52,8 @@ db.transactions.find()
         { $project: { _id: 1, total: 1 } },
         { $limit: 10 },
         ])
+
+    // Résultat : Les 10 clients avec le plus grand nombre de transactions, triés par nombre décroissant.
 
     //  2.2.1 Trouvez toutes les transactions qui remplissent SIMULTANÉMENT ces critères :
     //Montant supérieur à 5 millions
@@ -85,6 +91,7 @@ db.transactions.find()
             }
         ])
 
+    // Résultat : On obtient le nombre de transactions correspondant aux 4 critères simultanés et le taux de fraude parmi celles-ci.
 
     //  2.2.2 Identifiez les transactions effectuées à une heure inhabituelle (Unusual_Time_Transaction)
     //ET à plus de 100 km du domicile du client (Distance_From_Home). Parmi ces transactions, combien sont
@@ -111,6 +118,8 @@ db.transactions.aggregate([
     }
 ])
 
+    // Résultat : On obtient le nombre total de transactions à heure inhabituelle + distance > 100km, et combien sont frauduleuses.
+
     // 2.2.3 Recherchez les transactions effectuées dans les catégories de marchands suivantes :
     //"Electronics", "Clothing", "Restaurant". Affichez uniquement le Transaction_ID, le montant, la catégorie et
     //le statut de fraude.
@@ -132,6 +141,8 @@ db.transactions.aggregate([
         }
         ])
 
+    // Résultat : Liste des transactions dans les catégories Electronics, Clothing et Restaurant avec leur ID, montant, catégorie et statut de fraude.
+
     // 2.3.1 Le système a détecté une erreur : toutes les transactions du client "24239" datant
     //du 15/01/2025 ont été incorrectement marquées comme frauduleuses. Corrigez cette erreur en les
     //marquant comme légitimes.
@@ -147,6 +158,8 @@ db.transactions.aggregate([
         {
             $set: { "Fraud_Label": "Normal" }
             })
+
+    // Résultat : Les transactions frauduleuses du client 24239 du 15/01/2025 sont corrigées en "Normal".
 
     //  2.3.2 Ajoutez un nouveau champ risk_level à toutes les transactions. Ce champ doit être
     //calculé selon ces règles :
@@ -184,6 +197,8 @@ db.transactions.aggregate([
         { $set: { risk_level: "HIGH" } }
         )
 
+    // Résultat : Le champ risk_level est ajouté à toutes les transactions. On applique d'abord LOW à tous, puis MEDIUM écrase les concernés, puis HIGH écrase les plus risqués.
+
 //  2.3.3 Pour des raisons de conformité RGPD, vous devez anonymiser les IP_Address de toutes les
     //transactions de plus de 2 ans. Remplacez-les par "ANONYMIZED".
     db.transactions.updateMany(
@@ -196,6 +211,8 @@ db.transactions.aggregate([
             $set: { IP_Address: "ANONYMIZED" }
             }
         )
+
+    // Résultat : Toutes les IP des transactions de plus de 2 ans sont remplacées par "ANONYMIZED".
 
     //2.4.1 Créez une collection archive_transactions et déplacez-y toutes les transactions
     //frauduleuses ayant plus de 3 tentatives échouées (Failed_Transaction_Count >= 3). Après vérification,
@@ -223,3 +240,5 @@ db.transactions.aggregate([
         Fraud_Label: "Fraud",
         Failed_Transaction_Count: { $gte: 2 }
         })
+
+    // Résultat : Les transactions frauduleuses avec >= 2 tentatives échouées sont copiées dans archive_transactions via $out, puis supprimées de la collection principale. Le countDocuments final doit retourner 0.
